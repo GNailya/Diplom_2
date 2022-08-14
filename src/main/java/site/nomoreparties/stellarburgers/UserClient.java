@@ -1,55 +1,64 @@
 package site.nomoreparties.stellarburgers;
 
 import io.qameta.allure.Step;
-import io.restassured.response.ValidatableResponse;
+import io.restassured.response.Response;
+import site.nomoreparties.stellarburgers.model.User;
+import site.nomoreparties.stellarburgers.model.UserCredentials;
 
 import static io.restassured.RestAssured.given;
 
 public class UserClient extends RestAssuredClient {
-    private final String ROOT = "api/auth/";
+
 
     @Step("Создание пользователя")
-    public ValidatableResponse create(User user) {
-        return given()
+    public Response create(User user) {
+        return (Response) given()
                 .spec(getSpec())
                 .body(user)
                 .when()
-                .post(ROOT + "register/")
-                .then();
+                .post(BASE_URL + "/api/auth/register/")
+                .then().log().all().extract();
 
     }
 
     @Step("Логин пользователя")
-    public ValidatableResponse login(UserCredentials creds) {
-        return given()
+    public Response login(UserCredentials creds) {
+        return (Response) given()
                 .spec(getSpec())
                 .body(creds)
                 .when()
-                .post(ROOT + "login/")
-                .then();
+                .post(BASE_URL + "/api/auth/login/")
+                .then().log().all().extract();
 
     }
 
     @Step("Удаление пользователя")
-    public ValidatableResponse delete(int courierId) {
-        return given()
+    public void delete(String accessToken) {
+        if (accessToken == null) {
+            return;
+        }
+        given()
                 .spec(getSpec())
+                .header("authorization", accessToken)
                 .when()
-                .delete(ROOT + "user/")
-                .then();
+                .delete(BASE_URL + "/api/auth/user/")
+                .then()
+                .assertThat().log().all()
+                .statusCode(202)
+                .extract()
+                .path("ok");
     }
 
-    public static class UserCredentials {
-        public String emal;
-        public String password;
+    @Step("Обновление данных пользователя")
+    public Response updateUser(User user, String accessToken) {
 
-        public UserCredentials(String email, String password) {
-            this.emal = email;
-            this.password = password;
-        }
+        return (Response) given()
+                .spec(getSpec())
+                .header("authorization", accessToken)
+                .body(user)
+                .when()
+                .patch(BASE_URL + "/api/auth/user").then().log().all().extract();
 
-        public static UserCredentials from(User user) {
-            return new UserCredentials(user.email, user.password);
-        }
     }
+
 }
