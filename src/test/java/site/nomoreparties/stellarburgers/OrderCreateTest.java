@@ -13,26 +13,24 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertTrue;
 
-import static site.nomoreparties.stellarburgers.OrderClient.orderCreate;
 import static site.nomoreparties.stellarburgers.model.Order.getIngredientOrder;
 import static site.nomoreparties.stellarburgers.model.Order.getInvalideIngredientOrder;
 
 
 public class OrderCreateTest {
-    private User user;
     private UserClient userClient;
-    String accessToken;
-
-
+    private String accessToken;
+    private OrderClient orderClient;
 
 
     @Before
     public void setUp() {
-        user = User.getRandom();
+        User user = User.getRandom();
         userClient = new UserClient();
         userClient.create(user);
         Response responseLogin = userClient.login(UserCredentials.from(user));
         accessToken = responseLogin.jsonPath().getString("accessToken");
+        orderClient = new OrderClient();
     }
 
     @After
@@ -44,7 +42,7 @@ public class OrderCreateTest {
     @Test
     @DisplayName("Создание заказа с авторизацией")
     public void orderCreateWithAuthorizationTest() {
-        Response orderCreate = orderCreate(getIngredientOrder(), accessToken);
+        Response orderCreate = orderClient.orderCreate(getIngredientOrder(), accessToken);
 
         int statusCode = orderCreate.getStatusCode();
         boolean isOrderCreate = orderCreate.jsonPath().getBoolean("success");
@@ -57,7 +55,8 @@ public class OrderCreateTest {
     @Test
     @DisplayName("Создание заказа без авторизации")
     public void orderCreateOutAuthorizationTest() {
-        Response orderCreate = orderCreate(getIngredientOrder(), "");
+
+        Response orderCreate = orderClient.orderCreate(getIngredientOrder(), "");
 
         int statusCode = orderCreate.getStatusCode();
         boolean isOrderCreate = orderCreate.jsonPath().getBoolean("success");
@@ -70,7 +69,7 @@ public class OrderCreateTest {
     @DisplayName("Создание заказа без ингредиентов")
     public void orderCreateOutIngredientTest() {
         Order order = new Order(null);
-        Response orderCreate = orderCreate(order, "accessToken");
+        Response orderCreate = orderClient.orderCreate(order, "accessToken");
 
         int statusCode = orderCreate.getStatusCode();
         String message = orderCreate.jsonPath().getString("message");
@@ -82,7 +81,7 @@ public class OrderCreateTest {
     @Test
     @DisplayName("Создание заказа с невалидным хешем ингредиентов")
     public void orderCreateWithInvalidIngredientTest() {
-        Response orderCreate = orderCreate(getInvalideIngredientOrder(), "accessToken");
+        Response orderCreate = orderClient.orderCreate(getInvalideIngredientOrder(), "accessToken");
 
         int statusCode = orderCreate.getStatusCode();
         assertThat(statusCode, equalTo(500));

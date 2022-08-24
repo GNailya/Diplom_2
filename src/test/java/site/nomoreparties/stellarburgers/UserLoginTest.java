@@ -2,7 +2,6 @@ package site.nomoreparties.stellarburgers;
 
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
-import org.apache.http.auth.Credentials;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -18,7 +17,8 @@ import static org.junit.Assert.assertTrue;
 public class UserLoginTest {
     private User user;
     private UserClient userClient;
-    String accessToken;
+    private String accessToken;
+
 
     @Before
     public void setUp() {
@@ -42,7 +42,7 @@ public class UserLoginTest {
         boolean isSuccesLogin = responseLogin.jsonPath().getBoolean("success");
         String email = responseLogin.jsonPath().getString("user.email");
         String name = responseLogin.jsonPath().getString("user.name");
-        String accessToken = responseLogin.body().jsonPath().getString("accessToken");
+        accessToken = responseLogin.body().jsonPath().getString("accessToken");
         String refreshToken = responseLogin.body().jsonPath().getString("accessToken");
 
         assertThat(statusCode, equalTo(200));
@@ -59,7 +59,7 @@ public class UserLoginTest {
         Response responseLogin = userClient.login(UserCredentials.getRandomUserCredentials());
 
         int statusCode = responseLogin.getStatusCode();
-        String message = responseLogin.jsonPath().getString("message");
+        String message = responseLogin.body().jsonPath().getString("message");
 
         assertThat(statusCode, equalTo(401));
         assertThat(message, equalTo("email or password are incorrect"));

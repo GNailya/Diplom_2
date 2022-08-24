@@ -18,7 +18,7 @@ import static site.nomoreparties.stellarburgers.model.User.getRandom;
 public class UpdateUserTest {
     private UserClient userClient;
     private User user;
-    String accessToken;
+    private String accessToken;
 
 
     @Before

@@ -8,7 +8,9 @@ import site.nomoreparties.stellarburgers.model.UserCredentials;
 import static io.restassured.RestAssured.given;
 
 public class UserClient extends RestAssuredClient {
-
+    private final String LOGIN = "auth/login/";
+    private final String DELETE_OR_UPDATE = "auth/user/";
+    private final String REGISTER = "auth/register/";
 
     @Step("Создание пользователя")
     public Response create(User user) {
@@ -16,7 +18,7 @@ public class UserClient extends RestAssuredClient {
                 .spec(getSpec())
                 .body(user)
                 .when()
-                .post(BASE_URL + "/api/auth/register/")
+                .post(REGISTER)
                 .then().log().all().extract();
 
     }
@@ -27,7 +29,7 @@ public class UserClient extends RestAssuredClient {
                 .spec(getSpec())
                 .body(creds)
                 .when()
-                .post(BASE_URL + "/api/auth/login/")
+                .post(LOGIN)
                 .then().log().all().extract();
 
     }
@@ -41,7 +43,7 @@ public class UserClient extends RestAssuredClient {
                 .spec(getSpec())
                 .header("authorization", accessToken)
                 .when()
-                .delete(BASE_URL + "/api/auth/user/")
+                .delete(DELETE_OR_UPDATE)
                 .then()
                 .assertThat().log().all()
                 .statusCode(202)
@@ -57,7 +59,7 @@ public class UserClient extends RestAssuredClient {
                 .header("authorization", accessToken)
                 .body(user)
                 .when()
-                .patch(BASE_URL + "/api/auth/user").then().log().all().extract();
+                .patch(DELETE_OR_UPDATE).then().log().all().extract();
 
     }
 

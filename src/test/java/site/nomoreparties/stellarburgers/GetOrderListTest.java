@@ -15,24 +15,26 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static site.nomoreparties.stellarburgers.OrderClient.orderCreate;
+
 import static site.nomoreparties.stellarburgers.model.Order.getIngredientOrder;
 import static site.nomoreparties.stellarburgers.model.User.getRandom;
 
 public class GetOrderListTest {
-   private UserClient userClient;
-    String accessToken;
-    User user;
+    private UserClient userClient;
+    private String accessToken;
+    private OrderClient orderClient;
 
 
     @Before
     public void setUp() {
-        user = getRandom();
+        User user = getRandom();
         userClient = new UserClient();
         userClient.create(user);
         Response responseLogin = userClient.login(UserCredentials.from(user));
         accessToken = responseLogin.body().jsonPath().getString("accessToken");
-        orderCreate(getIngredientOrder(), accessToken);
+        orderClient = new OrderClient();
+        orderClient.orderCreate(getIngredientOrder(), accessToken);
+
 
     }
 
@@ -45,7 +47,7 @@ public class GetOrderListTest {
     @Test
     @DisplayName("Получение списка заказов")
     public void getOrderListWithAuthorizationTest() {
-        Response response = OrderClient.getOrderList(accessToken);
+        Response response = orderClient.getOrderList(accessToken);
 
         List<Object> orders = response.jsonPath().getList("orders");
         boolean isGetList = response.jsonPath().getBoolean("success");
@@ -58,7 +60,7 @@ public class GetOrderListTest {
     @Test
     @DisplayName("Получение списка заказов неавторизованным пользователем")
     public void getOrderListTest() {
-        Response response = OrderClient.getOrderList("");
+        Response response = orderClient.getOrderList("");
 
         int statusCode = response.getStatusCode();
         String message = response.jsonPath().getString("message");

@@ -2,6 +2,7 @@ package site.nomoreparties.stellarburgers;
 
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -18,7 +19,7 @@ public class CreateWithEmptyFieldTest {
     private final String password;
     private final String name;
     private UserClient userClient;
-    private User user;
+    private Response regWithNulEmail;
 
     public CreateWithEmptyFieldTest(String email, String password, String name) {
         this.email = email;
@@ -38,13 +39,23 @@ public class CreateWithEmptyFieldTest {
     @Before
     public void setUp() {
         userClient = new UserClient();
+
+    }
+
+    @After
+    public void tearDown() {
+
+        String accessToken = regWithNulEmail.body().jsonPath().getString("accessToken");
+        if (accessToken != null) {
+            userClient.delete(accessToken);
+        }
     }
 
     @Test
     @DisplayName("создать пользователя и не заполнить одно из обязательных полей.")
     public void createWithNulFieldTest() {
-        user = getDefault(email, password, name);
-        Response regWithNulEmail = userClient.create(user);
+        User user = getDefault(email, password, name);
+        regWithNulEmail = userClient.create(user);
 
         int statusCode = regWithNulEmail.getStatusCode();
         String message = regWithNulEmail.jsonPath().getString("message");
@@ -52,8 +63,11 @@ public class CreateWithEmptyFieldTest {
         assertThat(statusCode, equalTo(403));
         assertThat(message, equalTo("Email, password and name are required fields"));
 
+
     }
+
 }
+
 
 
 

@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
 public class UserCreateTest {
     private UserClient userClient;
     private User user;
-    String accessToken;
+    private String accessToken;
 
     @Before
     public void setUp() {
@@ -25,7 +25,7 @@ public class UserCreateTest {
 
     @After
     public void tearDown() {
-            userClient.delete(accessToken);
+        userClient.delete(accessToken);
 
     }
 
@@ -59,6 +59,7 @@ public class UserCreateTest {
 
         int statusCode = doubleReg.getStatusCode();
         String message = doubleReg.jsonPath().getString("message");
+        accessToken = doubleReg.body().jsonPath().getString("accessToken");
 
         assertThat(statusCode, equalTo(403));
         assertThat(message, equalTo("User already exists"));

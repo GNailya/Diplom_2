@@ -3,8 +3,8 @@ package site.nomoreparties.stellarburgers.model;
 import org.apache.commons.lang3.RandomStringUtils;
 
 public class UserCredentials {
-    public String email;
-    public String password;
+    private String email;
+    private String password;
 
     public UserCredentials(String email, String password) {
         this.email = email;
@@ -13,7 +13,7 @@ public class UserCredentials {
 
 
     public static UserCredentials from(User user) {
-        return new UserCredentials(user.email, user.password);
+        return new UserCredentials(user.getEmail(), user.getPassword());
     }
 
     public static UserCredentials getRandomUserCredentials() {
